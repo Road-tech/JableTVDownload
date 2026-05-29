@@ -14,13 +14,12 @@ from args import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-def download(url, proxy_url=None):
+def download(url, proxy_url=None, download_cover=True, download_encode=True, encode_quality=1):
 
   print('正在下載影片: ' + url)
   if proxy_url:
       print(f'使用代理: {proxy_url}')
-  
-  # 建立番號資料夾
+
   urlSplit = url.split('/')
   dirName = urlSplit[-2]
   if os.path.exists(f'{dirName}/{dirName}.mp4'):
@@ -29,8 +28,7 @@ def download(url, proxy_url=None):
   if not os.path.exists(dirName):
       os.makedirs(dirName)
   folderPath = os.path.join(os.getcwd(), dirName)
-  
-  #配置Selenium參數
+
   options = Options()
   options.add_argument('--no-sandbox')
   options.add_argument('--disable-dev-shm-usage')
@@ -46,12 +44,10 @@ def download(url, proxy_url=None):
   m3u8url = result[0]
   print(f'm3u8url: {m3u8url}')
 
-  # 得到 m3u8 網址
   m3u8urlList = m3u8url.split('/')
   m3u8urlList.pop(-1)
   downloadurl = '/'.join(m3u8urlList)
 
-  # 儲存 m3u8 file 至資料夾
   m3u8file = os.path.join(folderPath, dirName + '.m3u8')
   if proxy_url:
       proxy_handler = urllib.request.ProxyHandler({'http': proxy_url, 'https': proxy_url})
@@ -59,7 +55,6 @@ def download(url, proxy_url=None):
       urllib.request.install_opener(opener)
   urllib.request.urlretrieve(m3u8url, m3u8file)
 
-  # 得到 m3u8 file裡的 URI和 IV
   m3u8obj = m3u8.load(m3u8file)
   m3u8uri = ''
   m3u8iv = ''
@@ -69,38 +64,33 @@ def download(url, proxy_url=None):
           m3u8uri = key.uri
           m3u8iv = key.iv
 
-  # 儲存 ts網址 in tsList
   tsList = []
   for seg in m3u8obj.segments:
       tsUrl = downloadurl + '/' + seg.uri
       tsList.append(tsUrl)
 
-  # 有加密
   if m3u8uri:
       m3u8keyurl = downloadurl + '/' + m3u8uri
       proxies = {'http': proxy_url, 'https': proxy_url} if proxy_url else None
       response = requests.get(m3u8keyurl, headers=headers, timeout=10, proxies=proxies)
       contentKey = response.content
-      vt = m3u8iv.replace("0x", "")[:16].encode()  # IV 取前 16 位
-      # ✅ 改存 dict，讓每個執行緒自行建立 AES cipher（避免 Race Condition）
+      vt = m3u8iv.replace("0x", "")[:16].encode()
       ci_params = {'key': contentKey, 'iv': vt}
   else:
       ci_params = None
 
-  # 刪除m3u8 file
   deleteM3u8(folderPath)
 
-  # 開始爬蟲並下載mp4片段至資料夾
   prepareCrawl(ci_params, folderPath, tsList, proxy_url)
 
-  # 合成 mp4（Python 二進位串接）
   mergeMp4(folderPath, tsList)
 
-  # 轉檔：-c copy + faststart，讓播放器可邊下載邊播
-  ffmpegEncode(folderPath, dirName, 1)
+  if download_encode:
+      print(f'開始轉檔 (質量模式: {encode_quality})')
+      ffmpegEncode(folderPath, dirName, encode_quality)
 
-  # 刪除子mp4
   deleteMp4(folderPath)
 
-  # 取得封面
-  getCover(html_file=dr.page_source, folder_path=folderPath, proxy_url=proxy_url)
+  if download_cover:
+      print('下載封面圖片...')
+      getCover(html_file=dr.page_source, folder_path=folderPath, proxy_url=proxy_url)

@@ -8,6 +8,8 @@ import re
 
 def get_parser():
     parser = argparse.ArgumentParser(description="Jable TV Downloader")
+    parser.add_argument("--config", type=str, default="",
+                        help="配置文件路径 (默认: config.json)")
     parser.add_argument("--random", type=bool, default=False,
                         help="Enter True for download random ")
     parser.add_argument("--url", type=str, default="",
@@ -16,7 +18,17 @@ def get_parser():
                         help="Jable URL contains multiple avs")
     parser.add_argument("--proxy", type=str, default="",
                         help="HTTP proxy URL (e.g., http://proxy.example.com:8080)")
-    
+    parser.add_argument("--enable-proxy", action="store_true",
+                        help="启用代理 (需要配合 --proxy 使用)")
+    parser.add_argument("--disable-proxy", action="store_true",
+                        help="禁用代理")
+    parser.add_argument("--cover", type=bool, default=None,
+                        help="是否下载封面图片 (默认: True)")
+    parser.add_argument("--encode", type=bool, default=None,
+                        help="是否转码视频 (默认: True)")
+    parser.add_argument("--quality", type=int, default=None,
+                        help="转码质量 (1=最快, 2=适中, 3=最佳)")
+
     return parser
 
 
@@ -29,11 +41,7 @@ def av_recommand(proxy_url=None):
         urllib.request.install_opener(opener)
     request = Request(url, headers=headers)
     web_content = urlopen(request).read()
-    # 得到繞過轉址後的 html
     soup = BeautifulSoup(web_content, 'html.parser')
     h6_tags = soup.find_all('h6', class_='title')
     av_list = re.findall(r'https[^"]+', str(h6_tags))
     return random.choice(av_list)
-
-
-# print(av_recommand())

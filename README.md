@@ -25,6 +25,56 @@ docker build -t jable-downloader .
 docker run -it -v D:\downloads:/downloads jable-downloader
 ```
 
+### Docker 進階使用
+
+#### 使用設定檔 (config.json)
+
+將本機的 `config.json` 掛載到容器內，即可使用自訂設定：
+
+```bash
+docker run -it \
+  -v ./downloads:/downloads \
+  -v ./config.json:/app/config.json \
+  -e URL="https://jable.tv/videos/xxx/" \
+  jable-downloader
+```
+
+#### 使用環境變數設定選項
+
+也可以透過環境變數直接設定，無需修改設定檔：
+
+```bash
+docker run -it \
+  -v ./downloads:/downloads \
+  -e URL="https://jable.tv/videos/xxx/" \
+  -e PROXY="http://proxy.example.com:8080" \
+  -e ENABLE_PROXY="true" \
+  -e COVER="False" \
+  -e QUALITY="2" \
+  jable-downloader
+```
+
+| 環境變數 | 說明 |
+| :--- | :--- |
+| `URL` | 影片網址 |
+| `RANDOM` | 下載隨機熱門影片 (true/false) |
+| `ALL_URLS` | 演員頁網址，下載所有影片 |
+| `CONFIG` | 自訂設定檔路徑 (容器內) |
+| `PROXY` | 代理位址 |
+| `ENABLE_PROXY` | 啟用代理 (true) |
+| `DISABLE_PROXY` | 停用代理 (true) |
+| `COVER` | 是否下載封面 (true/false) |
+| `ENCODE` | 是否轉碼 (true/false) |
+| `QUALITY` | 轉碼品質 (1/2/3) |
+
+#### 使用 Docker Compose
+
+```bash
+# 1. 修改 docker-compose.yml 中的環境變數
+# 2. 啟動
+docker-compose up --build
+```
+
 ---
 
 ## 💻 傳統安裝（Windows）
@@ -79,6 +129,53 @@ python main.py
 
 ---
 
+## 📋 配置文件 (config.json)
+
+程式支援透過 JSON 設定檔管理常用設定，無需每次輸入參數。預設使用 `config.json`。
+
+### 設定檔架構
+
+```json
+{
+    "proxy": {
+        "enabled": false,
+        "url": "http://proxy.example.com:8080"
+    },
+    "download": {
+        "cover": true,
+        "encode": true,
+        "quality": 1
+    }
+}
+```
+
+### 設定說明
+
+| 設定項 | 說明 | 預設值 |
+| :--- | :--- | :--- |
+| **proxy.enabled** | 是否啟用代理 | `false` |
+| **proxy.url** | 代理伺服器位址 (需搭配 `enabled: true`) | 空字串 |
+| **download.cover** | 是否下載影片封面 | `true` |
+| **download.encode** | 是否使用 FFmpeg 轉碼優化 (可邊下載邊播放) | `true` |
+| **download.quality** | 轉碼品質 (1=最快, 2=適中, 3=最佳) | `1` |
+
+### 使用自訂設定檔
+
+```bash
+python main.py --config my_config.json --url <網址>
+```
+
+### 指令列參數優先順序
+
+指令列參數優先權高於設定檔，例如：
+
+```bash
+# 使用設定檔的代理設定，但關閉封面下載
+python main.py --url <網址> --cover False
+```
+
+---
+
 ## Argument Parser
 
 ```bash
@@ -107,6 +204,8 @@ kubectl get jobs                      # 查看任務狀態
 
 | 版本 | 日期 | 內容 |
 | :--- | :--- | :--- |
+| **v2.1** | 2026/05/30 | ⚙️ 新增 `config.json` 設定檔系統 |
+| | | 🚀 支援透過設定檔管理代理、封面下載、轉碼等選項 |
 | **v2.0** | 2026/03/15 | 🐳 支援 Docker 容器化部署、☸️ K8s (Job/PVC/ConfigMap) 支援 |
 | | | 📊 下載與合成加入 `tqdm` 即時進度條、🚀 優化合成與轉檔速度 |
 | **v1.11**| 2023/04/19 | 🦕 新增 ffmpeg 自動轉檔 |

@@ -1,0 +1,11 @@
+{
+    "proxy": {
+        "enabled": false,
+        "url": "http://proxy.example.com:8080"
+    },
+    "download": {
+        "cover": true,
+        "encode": true,
+        "quality": 1
+    }
+}
