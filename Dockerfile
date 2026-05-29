@@ -33,7 +33,15 @@ VOLUME ["/downloads"]
 # 預設工作目錄切到下載資料夾
 WORKDIR /downloads
 
+# ---- 啟動腳本 ----
+# 複製啟動腳本並賦予執行權限
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ 
 # ---- 啟動指令 ----
-# 執行主程式，透過環境變數 URL 傳入影片網址
-# 用法: docker run -e URL="https://jable.tv/..." jable-downloader
-CMD ["python", "/app/main.py"]
+# 執行主程式，透過環境變數傳入參數
+# 用法: 
+#   docker run -e URL="https://jable.tv/..." jable-downloader
+#   docker run -e URL="https://jable.tv/..." -e PROXY="http://proxy.example.com:8080" jable-downloader
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD []
