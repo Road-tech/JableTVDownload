@@ -1,5 +1,8 @@
 #!/bin/sh
 ARGS=""
+if [ "$SERVER" = "true" ]; then ARGS="$ARGS --server"; fi
+if [ -n "$HOST" ]; then ARGS="$ARGS --host $HOST"; fi
+if [ -n "$PORT" ]; then ARGS="$ARGS --port $PORT"; fi
 if [ -n "$URL" ]; then ARGS="$ARGS --url $URL"; fi
 if [ -n "$RANDOM" ]; then ARGS="$ARGS --random $RANDOM"; fi
 if [ -n "$ALL_URLS" ]; then ARGS="$ARGS --all-urls $ALL_URLS"; fi

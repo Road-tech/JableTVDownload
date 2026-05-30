@@ -32,6 +32,10 @@ VOLUME ["/downloads"]
 # 設定檔 config.json 可透過 -v 掛載自訂設定
 VOLUME ["/app/config.json"]
 
+# ---- 連接埠 ----
+# Webhook 伺服器預設端口
+EXPOSE 5000
+
 # 預設工作目錄切到下載資料夾
 WORKDIR /downloads
 
@@ -46,5 +50,6 @@ RUN chmod +x /app/entrypoint.sh
 #   docker run -e URL="https://jable.tv/..." jable-downloader
 #   docker run -e URL="https://jable.tv/..." -e PROXY="http://proxy.example.com:8080" jable-downloader
 #   docker run -v ./config.json:/app/config.json -e URL="..." jable-downloader
+#   docker run -e SERVER="true" -p 5000:5000 jable-downloader
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD []

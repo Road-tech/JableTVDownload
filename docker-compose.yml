@@ -7,21 +7,27 @@ services:
     image: jable-downloader:latest
     container_name: jable_downloader
     environment:
-      - URL=${URL:-}                  # 透過環境變數傳入影片網址
-      - RANDOM=${RANDOM:-}            # 下載隨機熱門影片 (true/false)
-      - ALL_URLS=${ALL_URLS:-}        # 下載演員所有影片 (演員頁網址)
-      - CONFIG=${CONFIG:-}            # 自訂設定檔路徑 (容器內)
-      - PROXY=${PROXY:-}              # 代理位址 (http://proxy.example.com:8080)
-      - ENABLE_PROXY=${ENABLE_PROXY:-} # 啟用代理 (true)
-      - DISABLE_PROXY=${DISABLE_PROXY:-} # 停用代理 (true)
-      - COVER=${COVER:-}              # 是否下載封面 (true/false)
-      - ENCODE=${ENCODE:-}            # 是否轉碼 (true/false)
-      - QUALITY=${QUALITY:-}          # 轉碼品質 (1/2/3)
+      - SERVER=${SERVER:-}                  # 啟動 Webhook 伺服器 (true)
+      - HOST=${HOST:-0.0.0.0}               # 伺服器位址
+      - PORT=${PORT:-5000}                  # 伺服器端口
+      - URL=${URL:-}                        # 透過環境變數傳入影片網址
+      - RANDOM=${RANDOM:-}                  # 下載隨機熱門影片 (true/false)
+      - ALL_URLS=${ALL_URLS:-}              # 下載演員所有影片 (演員頁網址)
+      - CONFIG=${CONFIG:-}                  # 自訂設定檔路徑 (容器內)
+      - PROXY=${PROXY:-}                    # 代理位址 (http://proxy.example.com:8080)
+      - ENABLE_PROXY=${ENABLE_PROXY:-}      # 啟用代理 (true)
+      - DISABLE_PROXY=${DISABLE_PROXY:-}    # 停用代理 (true)
+      - COVER=${COVER:-}                    # 是否下載封面 (true/false)
+      - ENCODE=${ENCODE:-}                  # 是否轉碼 (true/false)
+      - QUALITY=${QUALITY:-}                # 轉碼品質 (1/2/3)
     volumes:
-      - ./downloads:/downloads        # 本機 downloads 資料夾 ←→ 容器內 /downloads
-      - ./config.json:/app/config.json  # 本機 config.json ←→ 容器內 (選擇性)
-    stdin_open: true                  # 保持 stdin 開啟（互動模式）
+      - ./downloads:/downloads              # 本機 downloads 資料夾 ←→ 容器內 /downloads
+      - ./config.json:/app/config.json      # 本機 config.json ←→ 容器內 (選擇性)
+    ports:
+      - "5000:5000"                         # Webhook 伺服器端口
+    stdin_open: true                        # 保持 stdin 開啟（互動模式）
     tty: true
+    restart: unless-stopped                  # 自動重啟
 
   # ---- (可選) Redis 任務佇列 ----
   # 未來擴充成多任務排隊下載時使用

@@ -9,3 +9,4 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
 idna==3.6
 tqdm
+flask==3.0.0

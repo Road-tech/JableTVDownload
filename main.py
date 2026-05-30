@@ -4,6 +4,7 @@ from args import *
 from download import download
 from movies import movieLinks
 from config import load_config, get_proxy, is_cover_enabled, is_encode_enabled, get_encode_quality, config
+from webhook_server import run_server
 
 parser = get_parser()
 args = parser.parse_args()
@@ -30,22 +31,26 @@ if args.encode is not None:
 if args.quality is not None:
     config['download']['quality'] = args.quality
 
-proxy_url = get_proxy()
-download_cover = is_cover_enabled()
-download_encode = is_encode_enabled()
-encode_quality = get_encode_quality()
-
-if(len(args.url) != 0):
-    url = args.url
-    download(url, proxy_url, download_cover, download_encode, encode_quality)
-elif(args.random == True):
-    url = av_recommand(proxy_url)
-    download(url, proxy_url, download_cover, download_encode, encode_quality)
-elif(args.all_urls != ""):
-    all_urls = args.all_urls
-    urls = movieLinks(all_urls, proxy_url)
-    for url in urls:
-        download(url, proxy_url, download_cover, download_encode, encode_quality)
+# Webhook 伺服器模式
+if args.server:
+    run_server(host=args.host, port=args.port)
 else:
-    url = input('输入jable网址:')
-    download(url, proxy_url, download_cover, download_encode, encode_quality)
+    proxy_url = get_proxy()
+    download_cover = is_cover_enabled()
+    download_encode = is_encode_enabled()
+    encode_quality = get_encode_quality()
+
+    if(len(args.url) != 0):
+        url = args.url
+        download(url, proxy_url, download_cover, download_encode, encode_quality)
+    elif(args.random == True):
+        url = av_recommand(proxy_url)
+        download(url, proxy_url, download_cover, download_encode, encode_quality)
+    elif(args.all_urls != ""):
+        all_urls = args.all_urls
+        urls = movieLinks(all_urls, proxy_url)
+        for url in urls:
+            download(url, proxy_url, download_cover, download_encode, encode_quality)
+    else:
+        url = input('輸入jable網址:')
+        download(url, proxy_url, download_cover, download_encode, encode_quality)

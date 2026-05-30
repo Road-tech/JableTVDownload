@@ -8,26 +8,19 @@ import re
 
 def get_parser():
     parser = argparse.ArgumentParser(description="Jable TV Downloader")
-    parser.add_argument("--config", type=str, default="",
-                        help="配置文件路径 (默认: config.json)")
-    parser.add_argument("--random", type=bool, default=False,
-                        help="Enter True for download random ")
-    parser.add_argument("--url", type=str, default="",
-                        help="Jable TV URL to download")
-    parser.add_argument("--all-urls", type=str, default="",
-                        help="Jable URL contains multiple avs")
-    parser.add_argument("--proxy", type=str, default="",
-                        help="HTTP proxy URL (e.g., http://proxy.example.com:8080)")
-    parser.add_argument("--enable-proxy", action="store_true",
-                        help="启用代理 (需要配合 --proxy 使用)")
-    parser.add_argument("--disable-proxy", action="store_true",
-                        help="禁用代理")
-    parser.add_argument("--cover", type=bool, default=None,
-                        help="是否下载封面图片 (默认: True)")
-    parser.add_argument("--encode", type=bool, default=None,
-                        help="是否转码视频 (默认: True)")
-    parser.add_argument("--quality", type=int, default=None,
-                        help="转码质量 (1=最快, 2=适中, 3=最佳)")
+    parser.add_argument("--server", action="store_true", help="啟動 Webhook 伺服器模式")
+    parser.add_argument("--host", type=str, default="0.0.0.0", help="Webhook 伺服器位址 (預設: 0.0.0.0)")
+    parser.add_argument("--port", type=int, default=5000, help="Webhook 伺服器端口 (預設: 5000)")
+    parser.add_argument("--config", type=str, default="", help="設定檔路徑 (預設: config.json)")
+    parser.add_argument("--random", type=bool, default=False, help="Enter True for download random ")
+    parser.add_argument("--url", type=str, default="", help="Jable TV URL to download")
+    parser.add_argument("--all-urls", type=str, default="", help="Jable URL contains multiple avs")
+    parser.add_argument("--proxy", type=str, default="", help="HTTP proxy URL (e.g., http://proxy.example.com:8080)")
+    parser.add_argument("--enable-proxy", action="store_true", help="啟用代理 (需要配合 --proxy 使用)")
+    parser.add_argument("--disable-proxy", action="store_true", help="停用代理")
+    parser.add_argument("--cover", type=bool, default=None, help="是否下載封面圖片 (預設: True)")
+    parser.add_argument("--encode", type=bool, default=None, help="是否轉碼影片 (預設: True)")
+    parser.add_argument("--quality", type=int, default=None, help="轉碼品質 (1=最快, 2=適中, 3=最佳)")
 
     return parser
 

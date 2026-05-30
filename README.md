@@ -77,6 +77,82 @@ docker-compose up --build
 
 ---
 
+## 🌐 Webhook API 服務
+
+支援透過 HTTP API 呼叫下載任務，方便與其他系統整合。
+
+### 啟動 Webhook 伺服器
+
+```bash
+# 直接執行
+python main.py --server --host 0.0.0.0 --port 5000
+
+# Docker 方式
+docker run -it -p 5000:5000 -e SERVER="true" jable-downloader
+```
+
+### API 端點
+
+| 端點 | 方法 | 說明 |
+| :--- | :--- | :--- |
+| `/health` | GET | 健康檢查 |
+| `/api/download` | POST | 新增下載任務 |
+| `/api/config` | GET | 取得當前配置 |
+| `/api/config` | PUT/POST | 更新配置 |
+| `/api/tasks` | GET | 取得下載任務列表 |
+
+### API 使用範例
+
+#### 1. 新增下載任務
+
+```bash
+curl -X POST http://localhost:5000/api/download \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://jable.tv/videos/xxx/"}'
+```
+
+可選參數：
+```json
+{
+  "url": "https://jable.tv/videos/xxx/",
+  "cover": true,
+  "encode": true,
+  "quality": 1,
+  "proxy": "http://proxy.example.com:8080"
+}
+```
+
+#### 2. 取得當前配置
+
+```bash
+curl http://localhost:5000/api/config
+```
+
+#### 3. 更新配置
+
+```bash
+curl -X PUT http://localhost:5000/api/config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "proxy": {
+      "enabled": true,
+      "url": "http://proxy.example.com:8080"
+    },
+    "download": {
+      "cover": false,
+      "quality": 2
+    }
+  }'
+```
+
+#### 4. 查看下載任務
+
+```bash
+curl http://localhost:5000/api/tasks
+```
+
+---
+
 ## 💻 傳統安裝（Windows）
 
 1. 請自行安裝 ffmpeg，裝完之後執行 INIT.bat 將會自動建置其餘環境。
@@ -180,9 +256,28 @@ python main.py --url <網址> --cover False
 
 ```bash
 python main.py -h
+
+# Webhook 伺服器模式
+python main.py --server                    # 啟動 Webhook 伺服器
+python main.py --server --host 0.0.0.0 --port 5000  # 自訂監聽位址和端口
+
+# 下載模式
 python main.py --random True       # 下載隨機熱門影片
 python main.py --url <網址>         # 直接指定 URL
-python main.py --all_urls <演員頁>  # 下載演員所有影片
+python main.py --all-urls <演員頁>  # 下載演員所有影片
+
+# 設定檔相關
+python main.py --config my_config.json  # 使用自訂設定檔
+
+# 代理相關
+python main.py --enable-proxy                          # 啟用代理
+python main.py --disable-proxy                         # 停用代理
+python main.py --proxy "http://proxy.example.com:8080" # 設定代理位址
+
+# 下載選項
+python main.py --cover False  # 不下載封面
+python main.py --encode False # 不進行轉碼
+python main.py --quality 2    # 設定轉碼品質 (1/2/3)
 ```
 
 ---
@@ -204,6 +299,8 @@ kubectl get jobs                      # 查看任務狀態
 
 | 版本 | 日期 | 內容 |
 | :--- | :--- | :--- |
+| **v2.2** | 2026/05/30 | 🌐 新增 Webhook API 服務 |
+| | | 📡 支援 HTTP API 新城下載任務、更新設定 |
 | **v2.1** | 2026/05/30 | ⚙️ 新增 `config.json` 設定檔系統 |
 | | | 🚀 支援透過設定檔管理代理、封面下載、轉碼等選項 |
 | **v2.0** | 2026/03/15 | 🐳 支援 Docker 容器化部署、☸️ K8s (Job/PVC/ConfigMap) 支援 |
