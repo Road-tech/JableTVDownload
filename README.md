@@ -46,6 +46,7 @@ docker run -it \
 ```bash
 docker run -it \
   -v ./downloads:/downloads \
+  -v ./config.json:/app/config.json \
   -e URL="https://jable.tv/videos/xxx/" \
   -e PROXY="http://proxy.example.com:8080" \
   -e ENABLE_PROXY="true" \
@@ -56,6 +57,9 @@ docker run -it \
 
 | 環境變數 | 說明 |
 | :--- | :--- |
+| `SERVER` | 啟動 Webhook 伺服器 (true) |
+| `HOST` | 伺服器監聽位址 (預設: 0.0.0.0) |
+| `PORT` | 伺服器端口 (預設: 5000) |
 | `URL` | 影片網址 |
 | `RANDOM` | 下載隨機熱門影片 (true/false) |
 | `ALL_URLS` | 演員頁網址，下載所有影片 |
@@ -87,9 +91,15 @@ docker-compose up --build
 # 直接執行
 python main.py --server --host 0.0.0.0 --port 5000
 
-# Docker 方式
-docker run -it -p 5000:5000 -e SERVER="true" jable-downloader
+# Docker 方式（推薦掛載 config.json 以持久化配置）
+docker run -it -p 5000:5000 \
+  -v $(pwd)/downloads:/downloads \
+  -v $(pwd)/config.json:/app/config.json \
+  -e SERVER="true" \
+  jable-downloader
 ```
+
+> ⚠️ **注意**：建議掛載 `config.json` 以確保配置持久化。透過 API 更新的配置會保存到此檔案，容器重啟後仍然有效。
 
 ### API 端點
 
