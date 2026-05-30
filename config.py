@@ -32,7 +32,9 @@ def load_config(config_file=None):
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
                 loaded = json.load(f)
-                config = merge_config(DEFAULT_CONFIG, loaded)
+                loaded_config = merge_config(DEFAULT_CONFIG, loaded)
+                config.clear()
+                config.update(loaded_config)
             print(f'已加载配置文件: {config_file}')
             print('=' * 40)
             print('当前配置:')
@@ -40,11 +42,13 @@ def load_config(config_file=None):
             print('=' * 40)
         except Exception as e:
             print(f'加载配置文件失败: {e}, 使用默认配置')
-            config = DEFAULT_CONFIG.copy()
+            config.clear()
+            config.update(DEFAULT_CONFIG.copy())
             save_config(config_file)
     else:
         print(f'配置文件 {config_file} 不存在，使用默认配置')
-        config = DEFAULT_CONFIG.copy()
+        config.clear()
+        config.update(DEFAULT_CONFIG.copy())
         save_config(config_file)
 
     return config
