@@ -28,18 +28,24 @@ def load_config(config_file=None):
     if config_file is None:
         config_file = CONFIG_FILE
 
-    if os.path.exists(config_file):
+    if os.path.exists(config_file) and os.path.getsize(config_file) > 0:
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
                 loaded = json.load(f)
                 config = merge_config(DEFAULT_CONFIG, loaded)
             print(f'已加载配置文件: {config_file}')
+            print('=' * 40)
+            print('当前配置:')
+            print(json.dumps(config, indent=4, ensure_ascii=False))
+            print('=' * 40)
         except Exception as e:
             print(f'加载配置文件失败: {e}, 使用默认配置')
             config = DEFAULT_CONFIG.copy()
+            save_config(config_file)
     else:
         print(f'配置文件 {config_file} 不存在，使用默认配置')
         config = DEFAULT_CONFIG.copy()
+        save_config(config_file)
 
     return config
 
